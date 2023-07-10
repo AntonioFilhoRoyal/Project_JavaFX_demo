@@ -15,6 +15,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import model.service.DepartmentService;
 
 public class ViewController implements Initializable{
 
@@ -35,7 +36,7 @@ public class ViewController implements Initializable{
 	
 	@FXML
 	public void onMenuItemDeparment() {
-		loadView("/gui/Department.fxml");
+		loadView2("/gui/Department.fxml");
 	}
 	
 	@FXML
@@ -61,6 +62,29 @@ public class ViewController implements Initializable{
 			mainVBox.getChildren().clear();
 			mainVBox.getChildren().add(mainMenu);
 			mainVBox.getChildren().addAll(vbox.getChildren());
+			
+			
+		} catch(IOException e) {
+			Alerts.showAlert("IOException", "Error load view", e.getMessage(), AlertType.ERROR);
+		}
+	}
+	
+	private void loadView2(String nameView) {
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(nameView));
+			VBox vbox = loader.load();
+			
+			Scene mainScene = Main.getMainScene();
+			VBox mainVBox = (VBox) ((ScrollPane)mainScene.getRoot()).getContent();
+			
+			Node mainMenu = mainVBox.getChildren().get(0);
+			mainVBox.getChildren().clear();
+			mainVBox.getChildren().add(mainMenu);
+			mainVBox.getChildren().addAll(vbox.getChildren());
+			
+			DepartmentController controller = loader.getController();
+			controller.setDepartmentService(new DepartmentService());
+			controller.updateDeparment();
 			
 			
 		} catch(IOException e) {
