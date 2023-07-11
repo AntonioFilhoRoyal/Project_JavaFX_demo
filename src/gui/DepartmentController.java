@@ -14,7 +14,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
-import mode.entites.Department;
+import model.entites.Department;
 import model.service.DepartmentService;
 
 public class DepartmentController implements Initializable{
