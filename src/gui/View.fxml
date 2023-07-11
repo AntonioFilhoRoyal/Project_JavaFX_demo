@@ -6,11 +6,11 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="467.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.ViewController">
+<ScrollPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="469.0" prefWidth="620.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.ViewController">
    <content>
-      <VBox prefHeight="324.0" prefWidth="599.0">
+      <VBox prefHeight="337.0" prefWidth="619.0">
          <children>
-            <MenuBar>
+            <MenuBar prefHeight="25.0" prefWidth="619.0">
               <menus>
                 <Menu mnemonicParsing="false" text="Registration">
                   <items>
