@@ -121,7 +121,7 @@ public class SellerController implements Initializable, DataChangerListener {
 			controller.updateForm();
 
 			Stage dialog = new Stage();
-			dialog.setTitle("Departament New");
+			dialog.setTitle("Seller New");
 			dialog.setScene(new Scene(pane));
 			dialog.setResizable(false);
 			dialog.initOwner(stageParent);

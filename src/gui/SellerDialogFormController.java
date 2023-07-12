@@ -1,8 +1,11 @@
 package gui;
 
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -17,6 +20,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import model.entites.Seller;
@@ -38,7 +42,25 @@ public class SellerDialogFormController implements Initializable{
 	private TextField textName;
 	
 	@FXML
+	private TextField textEmail;
+	
+	@FXML
+	private DatePicker textBirtDate;
+	
+	@FXML
+	private TextField textBaseSalary;
+	
+	@FXML
 	private Label labelAlert;
+	
+	@FXML
+	private Label labelErrorEmail;
+	
+	@FXML
+	private Label labelErrorBirthDate;
+	
+	@FXML
+	private Label labelErrorBaseSalary;
 	
 	@FXML
 	private Button buttonSave;
@@ -64,6 +86,11 @@ public class SellerDialogFormController implements Initializable{
 			validation.addError("name", "Field was null");
 		}
 		seller.setName(textName.getText());
+		
+		if(textEmail.getText() == null || textEmail.getText().trim().equals("")) {
+			validation.addError("email", "Field was null");
+		}
+		seller.setEmail(textEmail.getText());
 		
 		if(validation.getErrors().size() > 0) {
 			throw validation;
@@ -122,15 +149,26 @@ public class SellerDialogFormController implements Initializable{
 
 	public void initializeNodes() {
 		Constraints.setTextFieldInteger(textID);
-		Constraints.setTextFieldMaxLength(textName, 30);
+		Constraints.setTextFieldMaxLength(textName, 100);
+		Constraints.setTextFieldDouble(textBaseSalary);
+		Constraints.setTextFieldMaxLength(textEmail, 50);
+		Utils.formatDatePicker(textBirtDate, "dd/MM/yyyy");
+		
 	}
 
 	public void updateForm() {
 		if(seller == null) {
 			throw new IllegalArgumentException("Error seller");
 		}
+		
+		Locale.setDefault(Locale.US);
 		textID.setText(String.valueOf(seller.getId()));
 		textName.setText(seller.getName());
+		textEmail.setText(seller.getEmail());
+		if(seller.getBirthDate() != null) {
+			textBirtDate.setValue(LocalDate.ofInstant(seller.getBirthDate().toInstant(), ZoneId.systemDefault()));
+		}
+		textBaseSalary.setText(String.format("%.2f", seller.getBaseSalary()));
 	}
 	
 	public void setErrors(Map<String, String> errors) {
