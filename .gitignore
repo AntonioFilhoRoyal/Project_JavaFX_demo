@@ -1,1 +1,10 @@
 /bin/
+target/
+nbproject/private/
+build/
+nbbduild/
+dist/
+nbdist/
+
+# ECLIPSE
+.settings/
