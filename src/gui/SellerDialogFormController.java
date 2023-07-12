@@ -1,9 +1,11 @@
 package gui;
 
 import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -58,7 +60,7 @@ public class SellerDialogFormController implements Initializable {
 	private TextField textEmail;
 
 	@FXML
-	private DatePicker textBirtDate;
+	private DatePicker textBirthDate;
 
 	@FXML
 	private TextField textBaseSalary;
@@ -108,6 +110,27 @@ public class SellerDialogFormController implements Initializable {
 		}
 		seller.setEmail(textEmail.getText());
 
+		if(textBirthDate == null) {
+			validation.addError("birthDate", "Field was null");
+		}
+		
+		if (textBirthDate.getValue() == null) {
+			validation.addError("birthDate", "Field was null");
+		} else {
+			Instant instant = Instant.from(textBirthDate.getValue().atStartOfDay(ZoneId.systemDefault()));
+			seller.setBirthDate(Date.from(instant));
+		}
+		
+		if (textBaseSalary.getText() == null || textBaseSalary.getText().trim().equals("")) {
+			validation.addError("BaseSalary", "Field was null");
+		}
+		seller.setBaseSalary(Utils.tryParseToDouble(textBaseSalary.getText()));
+		
+		if (comboBoxDepartment.getValue() == null) {
+			validation.addError("birthDate", "Field was null");
+		}
+		seller.setDepartment(comboBoxDepartment.getValue());
+		
 		if (validation.getErrors().size() > 0) {
 			throw validation;
 		}
@@ -165,7 +188,7 @@ public class SellerDialogFormController implements Initializable {
 		Constraints.setTextFieldMaxLength(textName, 100);
 		Constraints.setTextFieldDouble(textBaseSalary);
 		Constraints.setTextFieldMaxLength(textEmail, 50);
-		Utils.formatDatePicker(textBirtDate, "dd/MM/yyyy");
+		Utils.formatDatePicker(textBirthDate, "dd/MM/yyyy");
 		initializeComboBoxDepartment();
 
 	}
@@ -180,7 +203,7 @@ public class SellerDialogFormController implements Initializable {
 		textName.setText(seller.getName());
 		textEmail.setText(seller.getEmail());
 		if (seller.getBirthDate() != null) {
-			textBirtDate.setValue(LocalDate.ofInstant(seller.getBirthDate().toInstant(), ZoneId.systemDefault()));
+			textBirthDate.setValue(LocalDate.ofInstant(seller.getBirthDate().toInstant(), ZoneId.systemDefault()));
 		}
 		textBaseSalary.setText(String.format("%.2f", seller.getBaseSalary()));
 		
@@ -193,9 +216,11 @@ public class SellerDialogFormController implements Initializable {
 	public void setErrors(Map<String, String> errors) {
 		Set<String> field = errors.keySet();
 
-		if (field.contains("name")) {
-			labelAlert.setText(errors.get("name"));
-		}
+		labelAlert.setText((field.contains("name") ? errors.get("name") : ""));
+		labelErrorEmail.setText((field.contains("email") ? errors.get("email") : ""));
+		labelErrorBirthDate.setText((field.contains("birthDate") ? errors.get("birthDate") : ""));
+		labelErrorBaseSalary.setText((field.contains("baseSalary") ? errors.get("baseSalary") : ""));
+		labelAlert.setText((field.contains("department") ? errors.get("department") : ""));
 
 	}
 
