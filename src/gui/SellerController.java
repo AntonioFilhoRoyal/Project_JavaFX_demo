@@ -2,6 +2,7 @@ package gui;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -50,7 +51,16 @@ public class SellerController implements Initializable, DataChangerListener {
 
 	@FXML
 	private TableColumn<Seller, String> tableColumnName;
-
+	
+	@FXML
+	private TableColumn<Seller, String> tableColumnEmail;
+	
+	@FXML
+	private TableColumn<Seller, Date> tableColumnBirthDate;
+	
+	@FXML
+	private TableColumn<Seller, Double> tableColumnBaseSalary;
+	
 	@FXML
 	private TableColumn<Seller, Seller> tableColumnEDIT;
 
@@ -63,8 +73,8 @@ public class SellerController implements Initializable, DataChangerListener {
 	@FXML
 	private void onActionButtonRegister(ActionEvent event) {
 		Stage parentStage = Utils.currentStage(event);
-		Seller department = new Seller();
-		createSellerDialogForm(department, "/gui/SellerDialogForm.fxml", parentStage);
+		Seller seller = new Seller();
+		createSellerDialogForm(seller, "/gui/SellerDialogForm.fxml", parentStage);
 	}
 
 	@Override
@@ -76,7 +86,12 @@ public class SellerController implements Initializable, DataChangerListener {
 	public void initializeNodes() {
 		tableColumnId.setCellValueFactory(new PropertyValueFactory<>("id"));
 		tableColumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
-
+		tableColumnEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+		tableColumnBirthDate.setCellValueFactory(new PropertyValueFactory<>("birthDate"));
+		Utils.formatTableColumnDate(tableColumnBirthDate, "dd/MM/yyyy");
+		tableColumnBaseSalary.setCellValueFactory(new PropertyValueFactory<>("baseSalary"));
+		Utils.formatTableColumnDouble(tableColumnBaseSalary, 2);
+		
 		Stage stage = (Stage) Main.getMainScene().getWindow();
 		tableViewSeller.prefHeightProperty().bind(stage.heightProperty());
 
@@ -172,7 +187,7 @@ public class SellerController implements Initializable, DataChangerListener {
 			
 			try {
 				service.remove(obj);
-				updateDeparment();
+				updateSeller();
 			} catch(DbException e) {
 				Alerts.showAlert("Error removing", null, e.getMessage(), AlertType.ERROR);
 			}
