@@ -15,136 +15,149 @@ import gui.listeners.DataChangerListener;
 import gui.util.Alerts;
 import gui.util.Constraints;
 import gui.util.Utils;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.util.Callback;
+import model.entites.Department;
 import model.entites.Seller;
 import model.exceptions.ValidationException;
+import model.service.DepartmentService;
 import model.service.SellerService;
 
-public class SellerDialogFormController implements Initializable{
+public class SellerDialogFormController implements Initializable {
 
 	private Seller seller;
-	
+
 	private SellerService sellerService;
-	
+
 	private List<DataChangerListener> dataChangeListener = new ArrayList<>();
-	
+
+	private DepartmentService departmentService;
+
+	@FXML
+	private ComboBox<Department> comboBoxDepartment;
+
 	@FXML
 	private TextField textID;
-	
+
 	@FXML
 	private TextField textName;
-	
+
 	@FXML
 	private TextField textEmail;
-	
+
 	@FXML
 	private DatePicker textBirtDate;
-	
+
 	@FXML
 	private TextField textBaseSalary;
-	
+
 	@FXML
 	private Label labelAlert;
-	
+
 	@FXML
 	private Label labelErrorEmail;
-	
+
 	@FXML
 	private Label labelErrorBirthDate;
-	
+
 	@FXML
 	private Label labelErrorBaseSalary;
-	
+
 	@FXML
 	private Button buttonSave;
-	
+
 	@FXML
 	private Button buttonCancel;
-	
+
+	private ObservableList<Department> obsList;
+
 	public void setSeller(Seller entity) {
 		this.seller = entity;
 	}
-	
-	public void setSellerService(SellerService service) {
+
+	public void setServices(SellerService service, DepartmentService departmentService) {
 		this.sellerService = service;
+		this.departmentService = departmentService;
 	}
-	
+
 	private Seller getFormData() {
 		Seller seller = new Seller();
 		ValidationException validation = new ValidationException("Validation Error");
-		
+
 		seller.setId(Utils.tryParseToInt(textID.getText()));
-		
-		if(textName.getText() == null || textName.getText().trim().equals("")) {
+
+		if (textName.getText() == null || textName.getText().trim().equals("")) {
 			validation.addError("name", "Field was null");
 		}
 		seller.setName(textName.getText());
-		
-		if(textEmail.getText() == null || textEmail.getText().trim().equals("")) {
+
+		if (textEmail.getText() == null || textEmail.getText().trim().equals("")) {
 			validation.addError("email", "Field was null");
 		}
 		seller.setEmail(textEmail.getText());
-		
-		if(validation.getErrors().size() > 0) {
+
+		if (validation.getErrors().size() > 0) {
 			throw validation;
 		}
-		
+
 		return seller;
 	}
-	
+
 	public void subscribeDataChangeListener(DataChangerListener listener) {
 		dataChangeListener.add(listener);
 	}
-	
+
 	private void notifyListener() {
-		for(DataChangerListener listener : dataChangeListener) {
+		for (DataChangerListener listener : dataChangeListener) {
 			listener.onDataChange();
 		}
-		
+
 	}
-	
+
 	@FXML
 	private void onButtonSaveAction(ActionEvent event) {
-		if(seller == null) {
+		if (seller == null) {
 			throw new IllegalStateException("seller was null");
 		}
-		
-		if(sellerService == null) {
+
+		if (sellerService == null) {
 			throw new IllegalStateException("serivce was null");
 		}
-		
+
 		try {
 			seller = getFormData();
 			sellerService.saveOrUpdate(seller);
 			notifyListener();
 			Utils.currentStage(event).close();
-		} 
-		catch(ValidationException e) {
+		} catch (ValidationException e) {
 			setErrors(e.getErrors());
-		}
-		catch(DbException e) {
+		} catch (DbException e) {
 			Alerts.showAlert("Error saving object", "error saving", e.getMessage(), AlertType.ERROR);
 		}
 	}
-	
 
 	@FXML
 	private void onButtonCancelAction(ActionEvent event) {
 		Utils.currentStage(event).close();
 		System.out.println("Cancel");
 	}
-	
+
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void initializeNodes() {
@@ -153,31 +166,58 @@ public class SellerDialogFormController implements Initializable{
 		Constraints.setTextFieldDouble(textBaseSalary);
 		Constraints.setTextFieldMaxLength(textEmail, 50);
 		Utils.formatDatePicker(textBirtDate, "dd/MM/yyyy");
-		
+		initializeComboBoxDepartment();
+
 	}
 
 	public void updateForm() {
-		if(seller == null) {
+		if (seller == null) {
 			throw new IllegalArgumentException("Error seller");
 		}
-		
+
 		Locale.setDefault(Locale.US);
 		textID.setText(String.valueOf(seller.getId()));
 		textName.setText(seller.getName());
 		textEmail.setText(seller.getEmail());
-		if(seller.getBirthDate() != null) {
+		if (seller.getBirthDate() != null) {
 			textBirtDate.setValue(LocalDate.ofInstant(seller.getBirthDate().toInstant(), ZoneId.systemDefault()));
 		}
 		textBaseSalary.setText(String.format("%.2f", seller.getBaseSalary()));
+		
+		if(seller.getDepartment() == null) {
+			comboBoxDepartment.getSelectionModel().selectFirst();
+		}
+		comboBoxDepartment.setValue(seller.getDepartment());
 	}
-	
+
 	public void setErrors(Map<String, String> errors) {
 		Set<String> field = errors.keySet();
-		
-		if(field.contains("name")) {
+
+		if (field.contains("name")) {
 			labelAlert.setText(errors.get("name"));
 		}
-		
+
 	}
-	
+
+	public void loadAssociatedObject() {
+		if (departmentService == null) {
+			throw new IllegalStateException("service was null");
+		}
+
+		List<Department> list = departmentService.findAll();
+		obsList = FXCollections.observableArrayList(list);
+		comboBoxDepartment.setItems(obsList);
+	}
+
+	private void initializeComboBoxDepartment() {
+		Callback<ListView<Department>, ListCell<Department>> factory = lv -> new ListCell<Department>() {
+			@Override
+			protected void updateItem(Department item, boolean empty) {
+				super.updateItem(item, empty);
+				setText(empty ? "" : item.getName());
+			}
+		};
+		comboBoxDepartment.setCellFactory(factory);
+		comboBoxDepartment.setButtonCell(factory.call(null));
+	}
 }
